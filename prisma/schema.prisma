@@ -10,8 +10,6 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url = env("DATABASE_URL")
-  directUrl = env("DIRECT_URL")
 }
 
 enum NotificationType {
@@ -20,12 +18,12 @@ enum NotificationType {
 }
 
 model User {
-  id            String        @id @db.Uuid
-  email         String        @unique
-  full_name     String?
-  username      String        @unique
-  avatar_url    String?
-  created_at    DateTime      @default(now())
+  id         String   @id @db.Uuid
+  email      String   @unique
+  full_name  String?
+  username   String   @unique
+  avatar_url String?
+  created_at DateTime @default(now())
 
   admin         Admin?
   comments      Comment[]
@@ -34,57 +32,59 @@ model User {
 }
 
 model Admin {
-  id            String        @id @default(uuid())
-  userId        String        @unique @db.Uuid
-  userId        User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id     String @id @default(uuid())
+  userId String @unique @db.Uuid
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  roleLevel     Int           @default(1)
-  createdAt     DateTime      @default(now())
+  roleLevel Int      @default(1)
+  createdAt DateTime @default(now())
 
-  posts         Post[]
+  posts Post[]
 }
 
 model Post {
-  id            String        @id @default(uuid())
-  title         String
-  slug          String        @unique
-  content       String        @db.Text
-  published     Boolean       @default(false)
-  createdAt     DateTime      @default(now())
-  updatedAt     DateTime      @updatedAt
+  id        String   @id @default(uuid())
+  title     String
+  slug      String   @unique
+  content   String   @db.Text
+  published Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  adminId       String
-  admin         Admin         @relation(fields: [adminId], references: [id], onDelete: Cascade)
+  adminId  String
+  admin    Admin     @relation(fields: [adminId], references: [id], onDelete: Cascade)
+  comments Comment[]
+  likes    Like[]
 }
 
 model Comment {
-  id            String        @id @default(uuid())
-  content       String        @db.Text
-  createdAt     DateTime      @default(now())
-  updatedAt     DateTime      @updatedAt
+  id        String   @id @default(uuid())
+  content   String   @db.Text
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  userId        String        @db.Uuid
-  user          User          @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
-  postId        String
-  post          Post          @relation(fields: [postId], references: [id], onDelete: Cascade)
+  userId String @db.Uuid
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  postId String
+  post   Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
 
   likes         Like[]
   notifications Notification[]
 }
 
 model Like {
-  id            String        @id @default(uuid())
-  createdAt     DateTime      @default(now())
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
 
-  userId        String        @db.Uuid
-  user          User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String @db.Uuid
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  postId        String?
-  post          Post?         @relation(fields: [postId], references: [id], onDelete: Cascade)
+  postId String?
+  post   Post?   @relation(fields: [postId], references: [id], onDelete: Cascade)
 
-  commentId     String?
-  comment       Comment?      @relation(fields: [commentId], references: [id], onDelete: Cascade)
+  commentId String?
+  comment   Comment? @relation(fields: [commentId], references: [id], onDelete: Cascade)
 
   notifications Notification[]
 
@@ -93,17 +93,17 @@ model Like {
 }
 
 model Notification {
-  id            String           @id @default(uuid())
-  type          NotificationType
-  is_read       Boolean          @default(false) // Defaults to unread
-  createdAt     DateTime         @default(now())
+  id        String           @id @default(uuid())
+  type      NotificationType
+  is_read   Boolean          @default(false) // Defaults to unread
+  createdAt DateTime         @default(now())
 
-  userId        String           @db.Uuid
-  user          User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String @db.Uuid
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  commentId     String?
-  comment       Comment?         @relation(fields: [commentId], references: [id], onDelete: Cascade)
+  commentId String?
+  comment   Comment? @relation(fields: [commentId], references: [id], onDelete: Cascade)
 
-  likeId        String?
-  like          Like?            @relation(fields: [likeId], references: [id], onDelete: Cascade)
+  likeId String?
+  like   Like?   @relation(fields: [likeId], references: [id], onDelete: Cascade)
 }
