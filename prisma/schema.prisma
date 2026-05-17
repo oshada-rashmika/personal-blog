@@ -14,6 +14,11 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 
+enum NotificationType {
+  LIKE
+  REPLY
+}
+
 model User {
   id            String        @id @db.Uuid
   email         String        @unique
@@ -25,6 +30,7 @@ model User {
   admin         Admin?
   comments      Comment[]
   likes         Like[]
+  notifications Notification[]
 }
 
 model Admin {
@@ -64,6 +70,7 @@ model Comment {
   post          Post          @relation(fields: [postId], references: [id], onDelete: Cascade)
 
   likes         Like[]
+  notifications Notification[]
 }
 
 model Like {
@@ -76,9 +83,27 @@ model Like {
   postId        String?
   post          Post?         @relation(fields: [postId], references: [id], onDelete: Cascade)
 
-  commentId String?
-  comment   Comment? @relation(fields: [commentId], references: [id], onDelete: Cascade)
-  
+  commentId     String?
+  comment       Comment?      @relation(fields: [commentId], references: [id], onDelete: Cascade)
+
+  notifications Notification[]
+
   @@unique([userId, postId])
   @@unique([userId, commentId])
+}
+
+model Notification {
+  id            String           @id @default(uuid())
+  type          NotificationType
+  is_read       Boolean          @default(false) // Defaults to unread
+  createdAt     DateTime         @default(now())
+
+  userId        String           @db.Uuid
+  user          User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  commentId     String?
+  comment       Comment?         @relation(fields: [commentId], references: [id], onDelete: Cascade)
+
+  likeId        String?
+  like          Like?            @relation(fields: [likeId], references: [id], onDelete: Cascade)
 }
