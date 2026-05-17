@@ -32,4 +32,19 @@ model Admin {
 
   roleLevel     Int           @default(1)
   createdAt     DateTime      @default(now())
+
+  posts         Post[]
+}
+
+model Post {
+  id            String        @id @default(uuid())
+  title         String
+  slug          String        @unique
+  content       String        @db.Text
+  published     Boolean       @default(false)
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  adminId       String
+  admin         Admin         @relation(fields: [adminId], references: [id], onDelete: Cascade)
 }
